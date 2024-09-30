@@ -7,21 +7,42 @@ import { useEffect, useRef } from 'react'
 
 import { useAnimations, useFBX, useGLTF } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
+import { useFrame } from '@react-three/fiber';
+import { useControls } from 'leva';
+import * as THREE from "three";
 
 export function Avatar(props) {
+  const {headFollow, cursorFollow} = useControls({
+    headFollow: false,
+    cursorFollow: false,
+
+  })
  const group = useRef()
   const { nodes, materials } = useGLTF('models/devAvatar.glb');
-  const {animations: typingAnimation} = useFBX('animations/salute.fbx')
+  const {animations: saluteAnimation} = useFBX('animations/salute.fbx')
+  saluteAnimation[0].name = 'salute';
+  const {animations: typingAnimation} = useFBX('animations/typing.fbx')
   typingAnimation[0].name = 'typing';
-  const {actions} = useAnimations(typingAnimation,group);
+  const {actions} = useAnimations([saluteAnimation[0],  typingAnimation[0]],group);
+
+  useFrame((state, delta) => {
+    if(headFollow){
+      group.current.getObjectByName('Head').lookAt(state.camera.position);
+    };
+    if(cursorFollow){
+      const target = new THREE.Vector3(state.pointer.x , state.pointer.y , 1);
+      group.current.getObjectByName("Spine2").lookAt(target);
+    }
+    
+  });
 
   useEffect(() => {
-    actions['typing'].reset().play();
+    actions['salute'].reset().play();
    
   }, []);
 
   return (
-    <group {...props} dispose={null} ref={group}>
+    <group {...props} dispose={null} ref={group} rotation-x={-Math.PI/2}>
       <primitive object={nodes.Hips} />
       <skinnedMesh geometry={nodes.Wolf3D_Hair.geometry} material={materials.Wolf3D_Hair} skeleton={nodes.Wolf3D_Hair.skeleton} />
       <skinnedMesh geometry={nodes.Wolf3D_Glasses.geometry} material={materials.Wolf3D_Glasses} skeleton={nodes.Wolf3D_Glasses.skeleton} />

@@ -21,34 +21,34 @@ export function Avatar(props) {
 
   })
  const group = useRef()
-  const { nodes, materials } = useGLTF('models/devAvatar.glb');
+  const { nodes, materials } = useGLTF('models/devAvatar8.glb');
   const {animations: saluteAnimation} = useFBX('animations/salute.fbx');
   const {animations: typingAnimation} = useFBX('animations/typing.fbx');
   const {animations: idleAnimation} = useFBX('animations/idle.fbx');
-  const {animations: fallingIdleAnimation} = useFBX('animations/fallingIdle.fbx');
-  const {animations: fallingToLandingAnimation} = useFBX('animations/fallingToLanding.fbx');
+  const {animations: fallingAnimation} = useFBX('animations/falling.fbx');
+  const {animations: fallingToLandingAnimation} = useFBX('animations/fallingToLand.fbx');
 
   typingAnimation[0].name = 'typing';
   saluteAnimation[0].name = 'salute';
   idleAnimation[0].name = 'idle';
-  fallingIdleAnimation[0].name = 'fallingIdle';
+  fallingAnimation[0].name = 'falling';
   fallingToLandingAnimation[0].name = 'fallingToLanding';
   
   
-  const {actions} = useAnimations([saluteAnimation[0],  typingAnimation[0], idleAnimation[0], fallingIdleAnimation[0], fallingToLandingAnimation[0] ],group);
+  const {actions} = useAnimations([saluteAnimation[0],  typingAnimation[0], idleAnimation[0], fallingAnimation[0], fallingToLandingAnimation[0] ],group);
 
   useFrame((state) => {
     if (headFollow) {
       group.current.getObjectByName("Head").lookAt(state.camera.position);
     }
     if (cursorFollow) {
-      const target = new THREE.Vector3(state.mouse.x, state.mouse.y, 1);
+      const target = new THREE.Vector3(state.pointer.x, state.pointer.y, 1);
       group.current.getObjectByName("Spine2").lookAt(target);
     }
   });
 
   useEffect(() => {
-    actions[animation].reset().play();
+    actions[animation].reset().fadeIn(1).play();
     return () => {
       actions[animation].reset().fadeOut(0.5);
     };
@@ -62,7 +62,8 @@ export function Avatar(props) {
 
   return (
     <group {...props} dispose={null} ref={group} >
-      <group rotation-x={-Math.PI/2}>
+   
+
       <primitive object={nodes.Hips} />
       <skinnedMesh geometry={nodes.Wolf3D_Hair.geometry} material={materials.Wolf3D_Hair} skeleton={nodes.Wolf3D_Hair.skeleton} />
       <skinnedMesh geometry={nodes.Wolf3D_Glasses.geometry} material={materials.Wolf3D_Glasses} skeleton={nodes.Wolf3D_Glasses.skeleton} />
@@ -75,7 +76,7 @@ export function Avatar(props) {
       <skinnedMesh name="Wolf3D_Head" geometry={nodes.Wolf3D_Head.geometry} material={materials.Wolf3D_Skin} skeleton={nodes.Wolf3D_Head.skeleton} morphTargetDictionary={nodes.Wolf3D_Head.morphTargetDictionary} morphTargetInfluences={nodes.Wolf3D_Head.morphTargetInfluences} />
       <skinnedMesh name="Wolf3D_Teeth" geometry={nodes.Wolf3D_Teeth.geometry} material={materials.Wolf3D_Teeth} skeleton={nodes.Wolf3D_Teeth.skeleton} morphTargetDictionary={nodes.Wolf3D_Teeth.morphTargetDictionary} morphTargetInfluences={nodes.Wolf3D_Teeth.morphTargetInfluences} />
       <skinnedMesh name="Wolf3D_Beard" geometry={nodes.Wolf3D_Beard.geometry} material={materials.Wolf3D_Beard} skeleton={nodes.Wolf3D_Beard.skeleton} morphTargetDictionary={nodes.Wolf3D_Beard.morphTargetDictionary} morphTargetInfluences={nodes.Wolf3D_Beard.morphTargetInfluences} />
-      </group>
+
     </group>
   )
 }
